@@ -21,18 +21,18 @@ df = (spark.readStream
 df.printSchema()
 
 #Create dataframe that counts number of events coming in every 2 minutes, set the delayThresold as 1 hour and display order from the oldest to the latest
-df3 = (df.withWatermark("timestamp", "1 hours")
-	.groupBy(window(col("timestamp"), "120 seconds"))
+df3 = (df.withWatermark('timestamp', '1 hours')
+	.groupBy(window(col('timestamp'), '120 seconds'))
 	.count()
-	.orderBy(desc("window")))
+	.orderBy(desc('window')))
 
 #Show the result in console for every 1 minute, with checkpoint
 (df3.writeStream
-	.trigger(processingTime="60 seconds")
-    .option("truncate", False)
-    .option("checkpointLocation", "/spark_streaming/checkpoint_3")
-    .queryName("record_count_per_2_minutes")
+	.trigger(processingTime = '60 seconds')
+    .option('truncate', False)
+    .option('checkpointLocation', '/spark_streaming/checkpoint_3')
+    .queryName('record_count_per_2_minutes')
     .format("console")
-    .outputMode("complete")
+    .outputMode('complete')
     .start()
     .awaitTermination())
