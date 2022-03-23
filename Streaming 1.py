@@ -11,10 +11,27 @@ df = (spark.readStream
 	.option('failOnDataLoss', 'false')
 	.load())
 
-#save as json files for every 5 seconds, checkpoint included
-(df.writeStream
+#Check schema
+df.printSchema()
+
+#Cast the datatype of column 'value' to string and save the new dataframe as df1
+df1=df.select(col("value").cast("string"))
+df1.printSchema()
+
+
+#Save as json files for every 5 seconds, checkpoint included
+(df1.writeStream
 	.trigger(processingTime('5 seconds'))
 	.format('json')
+	.option('path', '/user/ken/Spark_Streaming/json')
+	.option('checkpointLocation', '/user/ken/Spark_Streaming/checkpoint/checkpoint1')
+	.outputMode('append')
+	.start())
+
+#Additional way - changing format to text can save only the values of the dataframe
+(df1.writeStream
+	.trigger(processingTime('5 seconds'))
+	.format('text')
 	.option('path', '/user/ken/Spark_Streaming/json')
 	.option('checkpointLocation', '/user/ken/Spark_Streaming/checkpoint/checkpoint1')
 	.outputMode('append')
