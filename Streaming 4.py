@@ -20,22 +20,30 @@ df = (spark.readStream
 #Check schema
 df.printSchema()
 
-#Only select two columns and cast the 'value
+#Only select two columns and cast the 'value' to datatype string
 df4 = df.select(col('value').cast('string'), col('timestamp'))
 df4.printSchema()
 
-df4_1 = df4.select(from_json(col('value'), rsvp_schema).alias('record'),col('timestamp'))
+#Get the schema from previous practice(streaming 1)
+schema_path = '/user/ken/Spark_Streaming/json'
+historical = spark.read.json(schema_path)
+rsvp_schema = historical.schema
 
+#Get contents from column 'value' and only select the contents and timestamp, named as df4_2
+df4_1 = df4.select(from_json(col('value'), rsvp_schema).alias('record'),col('timestamp'))
 df4_2 = df4_1.select(col('record.state'), col('timestamp'))
 df4_2.printSchema()
 
+#Create a dataframe that counts number of events for every 1 minute and last for 3 minutes
+#set the delayThresold as 20 minutes and display order from the oldest to the latest
 final_df = (df4_2.withWatermark('timestamp', '20 minutes')
 	.groupBy(window(col('timestamp'), '3 minutes', "1 minutes'),col('state'))
 	.count()
 	.sort(desc('window'), col('state')))
 
+#Show the result in console for every 1 minute, with checkpoint
 (final_df.writeStream
-	.trigger(processingTime="60 seconds")
+	.trigger(processingTime = "60 seconds")
 	.option("truncate", False)
 	.option("checkpointLocation", chkpoint_path)
 	.queryName("window_count_by_country")
