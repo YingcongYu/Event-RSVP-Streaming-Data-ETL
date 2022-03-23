@@ -19,7 +19,7 @@ df = (spark.readStream
 df.printSchema()
 
 #Cast the datatype of column 'value' to string and save the new dataframe as df1
-df1=df.select(col("value").cast("string"))
+df1=df.select(col('value').cast('string'))
 df1.printSchema()
 
 
