@@ -2,6 +2,10 @@
 
 #Source of Streaming data: meetup_rsvp
 
+#Import nessary packages
+from pyspark.sql import SparkSession,Row
+from pyspark.sql.functions import *
+
 #Read data from meetup_rsvp and named it df
 df = (spark.readStream
 	.format('kafka')
