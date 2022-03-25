@@ -22,16 +22,8 @@ df.printSchema()
 df2 = df.select(col("value").cast("string"))
 df2.printSchema()
 
-#Save as parquet files for every 5 seconds, with checkpoint
-(df2.writeStream
-	.trigger(processingTime = '5 seconds')
-	.format('parquet')
-	.option('path', '/user/ken/Spark_Streaming/parquet')
-	.option('checkpointLocation', '/user/ken/Spark_Streaming/checkpoint/checkpoint2')
-	.outputMode('append')
-	.start())
-
-#Additional practice - save as 5 individual columns parquet files for every 1 minute, with checkpoint
+#Assign schema for each column under 'value'
+#Save as parquet files WITH SCHEMA for every 1 minute, with checkpoint
 (df2.select(get_json_object('value', '$.city').alias('city'),
 		get_json_object('value', '$.rsvp_id').alias('rsvp_id'),
 		get_json_object('value', '$.company').alias('company'),
